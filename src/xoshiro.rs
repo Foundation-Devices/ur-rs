@@ -37,22 +37,6 @@ impl Xoshiro256 {
     pub fn next_int(&mut self, low: u64, high: u64) -> u64 {
         (self.next_double() * ((high - low + 1) as f64)) as u64 + low
     }
-
-    pub fn shuffled<T>(&mut self, mut items: Vec<T>) -> Vec<T> {
-        let mut shuffled = Vec::<T>::with_capacity(items.len());
-        while !items.is_empty() {
-            let index = self.next_int(0, (items.len() - 1) as u64) as usize;
-            let item = items.remove(index);
-            shuffled.push(item);
-        }
-        shuffled
-    }
-
-    pub fn choose_degree(&mut self, length: usize) -> u32 {
-        let degree_weights: Vec<f64> = (1..=length).map(|x| 1.0 / x as f64).collect();
-        let mut sampler = crate::sampler::Weighted::new(degree_weights);
-        sampler.next(self) + 1
-    }
 }
 
 impl From<&str> for Xoshiro256 {
@@ -83,6 +67,7 @@ impl From<[u8; 32]> for Xoshiro256 {
 #[cfg(test)]
 pub mod test_utils {
     use super::*;
+    use crate::CRC32;
 
     impl super::Xoshiro256 {
         #[allow(clippy::cast_possible_truncation)]
@@ -96,7 +81,7 @@ pub mod test_utils {
 
         #[must_use]
         pub fn from_crc(bytes: &[u8]) -> Self {
-            Self::from(&crate::crc32().checksum(bytes).to_be_bytes()[..])
+            Self::from(&CRC32.checksum(bytes).to_be_bytes()[..])
         }
     }
 
@@ -152,28 +137,6 @@ mod tests {
         ];
         for e in expected {
             assert_eq!(rng.next_int(1, 10), e);
-        }
-    }
-
-    #[test]
-    fn test_shuffle() {
-        let mut rng = Xoshiro256::from("Wolf");
-        let values = vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-        let expected = vec![
-            vec![6, 4, 9, 3, 10, 5, 7, 8, 1, 2],
-            vec![10, 8, 6, 5, 1, 2, 3, 9, 7, 4],
-            vec![6, 4, 5, 8, 9, 3, 2, 1, 7, 10],
-            vec![7, 3, 5, 1, 10, 9, 4, 8, 2, 6],
-            vec![8, 5, 7, 10, 2, 1, 4, 3, 9, 6],
-            vec![4, 3, 5, 6, 10, 2, 7, 8, 9, 1],
-            vec![5, 1, 3, 9, 4, 6, 2, 10, 7, 8],
-            vec![2, 1, 10, 8, 9, 4, 7, 6, 3, 5],
-            vec![6, 7, 10, 4, 8, 9, 2, 3, 1, 5],
-            vec![10, 2, 1, 7, 9, 5, 6, 3, 4, 8],
-        ];
-        for e in expected {
-            let shuffled = rng.shuffled(values.clone());
-            assert_eq!(shuffled, e);
         }
     }
 }

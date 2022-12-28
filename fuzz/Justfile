@@ -1,0 +1,31 @@
+alias c := clean
+alias d := debug
+alias r := run
+
+export HFUZZ_RUN_ARGS := "--run_time 120 --exit_upon_crash"
+export HFUZZ_DEBUGGER := "gdb"
+
+targets := `cargo metadata --format-version 1 | jq -r '[.packages[] | select(.name=="fuzz").targets[] | select(.kind[]=="bin").name] | @sh'`
+
+# Clean
+clean:
+    cargo hfuzz clean
+
+# Debug fuzz target.
+debug target:
+    cargo hfuzz run-debug {{target}} hfuzz_workspace/{{target}}/*.fuzz
+
+# Run fuzz target.
+run target:
+    cargo hfuzz run {{target}}
+
+# Run all fuzz targets.
+all:
+    #!/bin/sh
+
+    echo "{{targets}}"
+
+    for TARGET in {{targets}}
+    do
+        cargo hfuzz run $TARGET
+    done

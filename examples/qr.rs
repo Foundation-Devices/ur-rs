@@ -1,14 +1,20 @@
 use qrcode::QrCode;
+use ur::HeaplessEncoder;
 
 use std::io::Write;
+use std::sync::Mutex;
+
+static ENCODER: Mutex<HeaplessEncoder<5, 128>> = Mutex::new(HeaplessEncoder::new_heapless());
 
 fn main() {
-    let mut encoder =
-        ur::Encoder::new(std::env::args().last().unwrap().as_bytes(), 5, "bytes").unwrap();
+    let message = std::env::args().last().unwrap().into_bytes().leak();
+
+    let mut encoder = ENCODER.lock().unwrap();
+    encoder.start("bytes", message, 5);
     let mut stdout = std::io::stdout();
     loop {
-        let ur = encoder.next_part().unwrap();
-        let code = QrCode::new(&ur).unwrap();
+        let ur = encoder.next_part();
+        let code = QrCode::new(&ur.to_string()).unwrap();
         let string = code
             .render::<char>()
             .quiet_zone(false)

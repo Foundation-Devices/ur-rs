@@ -1,7 +1,7 @@
 use phf::phf_map;
 
 #[rustfmt::skip]
-pub const WORDS: [&str; 256] = [
+pub static WORDS: [&str; 256] = [
     "able", "acid", "also", "apex", "aqua", "arch", "atom", "aunt",
     "away", "axis", "back", "bald", "barn", "belt", "beta", "bias",
     "blue", "body", "brag", "brew", "bulb", "buzz", "calm", "cash",
@@ -296,7 +296,7 @@ pub static WORD_IDXS: phf::Map<&'static str, u8> = phf_map! {
 };
 
 #[rustfmt::skip]
-pub const MINIMALS: [&str; 256] = [
+pub static MINIMALS: [&str; 256] = [
     "ae", "ad", "ao", "ax", "aa", "ah", "am", "at",
     "ay", "as", "bk", "bd", "bn", "bt", "ba", "bs",
     "be", "by", "bg", "bw", "bb", "bz", "cm", "ch",

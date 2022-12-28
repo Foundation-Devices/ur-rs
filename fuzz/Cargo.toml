@@ -4,17 +4,47 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-honggfuzz = "0.5.55"
-ur = { path = ".." }
+arbitrary = { version = "1", features = ["derive"] }
+honggfuzz = "0.5"
+minicbor = "0.19"
+ur = { path = "..", features = ["arbitrary"] }
 
 [[bin]]
 name = "bytewords_decode"
 path = "fuzz_targets/bytewords_decode.rs"
 
 [[bin]]
-name = "bytewords_encode"
-path = "fuzz_targets/bytewords_encode.rs"
+name = "bytewords_roundtrip"
+path = "fuzz_targets/bytewords_roundtrip.rs"
+
+[[bin]]
+name = "fountain_chooser"
+path = "fuzz_targets/fountain_chooser.rs"
+
+[[bin]]
+name = "fountain_decode"
+path = "fuzz_targets/fountain_decode.rs"
+
+[[bin]]
+name = "fountain_part_decode"
+path = "fuzz_targets/fountain_part_decode.rs"
+
+[[bin]]
+name = "fountain_part_encode"
+path = "fuzz_targets/fountain_part_encode.rs"
+
+[[bin]]
+name = "fountain_sampler"
+path = "fuzz_targets/fountain_sampler.rs"
+
+[[bin]]
+name = "ur_decode"
+path = "fuzz_targets/ur_decode.rs"
 
 [[bin]]
 name = "ur_encode"
 path = "fuzz_targets/ur_encode.rs"
+
+[[bin]]
+name = "ur_parse"
+path = "fuzz_targets/ur_parse.rs"

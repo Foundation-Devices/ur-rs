@@ -314,7 +314,7 @@ impl<T: Types> BaseDecoder<T> {
             self.queue.push_back(part);
         } else {
             self.reduce_mixed(&part);
-            self.mixed_parts.try_push(part).unwrap();
+            self.mixed_parts.try_push(part).ok();
         }
     }
 }

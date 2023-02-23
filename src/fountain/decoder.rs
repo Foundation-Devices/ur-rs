@@ -187,11 +187,16 @@ impl<T: Types> BaseDecoder<T> {
     /// [`complete`]: BaseDecoder::is_complete
     pub fn message(&self) -> Result<Option<&[u8]>, Error> {
         if self.is_complete() {
-            if self.message[self.message_description.as_ref().unwrap().message_length..].iter().any(|&b| b != 0) {
+            if self.message[self.message_description.as_ref().unwrap().message_length..]
+                .iter()
+                .any(|&b| b != 0)
+            {
                 return Err(Error::InvalidPadding);
             }
 
-            Ok(Some(&self.message[..self.message_description.as_ref().unwrap().message_length]))
+            Ok(Some(
+                &self.message[..self.message_description.as_ref().unwrap().message_length],
+            ))
         } else {
             Ok(None)
         }
@@ -208,7 +213,14 @@ impl<T: Types> BaseDecoder<T> {
             return false;
         }
 
-        self.received.len() == self.message_description.as_ref().unwrap().sequence_count.try_into().unwrap()
+        self.received.len()
+            == self
+                .message_description
+                .as_ref()
+                .unwrap()
+                .sequence_count
+                .try_into()
+                .unwrap()
     }
 
     /// Calculate estimated percentage of completion.
@@ -221,7 +233,8 @@ impl<T: Types> BaseDecoder<T> {
             return 0.0;
         }
 
-        let estimated_input_parts = f64::from(self.message_description.as_ref().unwrap().sequence_count) * 1.75;
+        let estimated_input_parts =
+            f64::from(self.message_description.as_ref().unwrap().sequence_count) * 1.75;
         let received_parts = u32::try_from(self.received.len()).unwrap();
         f64::min(0.99, f64::from(received_parts) / estimated_input_parts)
     }
@@ -280,7 +293,8 @@ impl<T: Types> BaseDecoder<T> {
         self.reduce_mixed(part);
 
         let offset = index * self.message_description.as_ref().unwrap().fragment_length;
-        self.message[offset..offset + self.message_description.as_ref().unwrap().fragment_length].copy_from_slice(&part.data);
+        self.message[offset..offset + self.message_description.as_ref().unwrap().fragment_length]
+            .copy_from_slice(&part.data);
         self.received.insert(index);
     }
 
@@ -294,7 +308,11 @@ impl<T: Types> BaseDecoder<T> {
         // Reduce this part by all simple parts.
         for &index in self.received.iter() {
             let offset = index * self.message_description.as_ref().unwrap().fragment_length;
-            part.reduce_by_simple(&self.message[offset..offset + self.message_description.as_ref().unwrap().fragment_length], index);
+            part.reduce_by_simple(
+                &self.message
+                    [offset..offset + self.message_description.as_ref().unwrap().fragment_length],
+                index,
+            );
             if part.is_simple() {
                 break;
             }

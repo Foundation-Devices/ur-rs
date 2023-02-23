@@ -39,6 +39,6 @@ fn main() {
         "Dynamic Encoder: {} bytes.",
         std::mem::size_of::<ur::Encoder<'_, '_>>()
     );
-    print_static_decoder_size::<4096, 16, QR13L_MAX, 30, 16, {"crypto-coin-info".len()}>();
+    print_static_decoder_size::<4096, 16, QR13L_MAX, 30, 16, { "crypto-coin-info".len() }>();
     print_static_encoder_size::<QR13L_MAX, 100>();
 }

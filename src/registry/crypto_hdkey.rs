@@ -155,45 +155,50 @@ impl<'b, Ctx, C: Vec<PathComponent>> Decode<'b, Ctx> for DerivedKey<'b, C> {
         let mut name = None;
         let mut note = None;
 
-        macro_rules! decode_inner {
-            () => {
-                match d.u32()? {
-                    2 => is_private = d.bool()?,
-                    3 => key_data = Some(DecodeBytes::decode_bytes(d, ctx)?),
-                    4 => chain_code = Some(DecodeBytes::decode_bytes(d, ctx)?),
-                    5 => match d.tag()? {
-                        Tag::Unassigned(305) => use_info = Some(CryptoCoinInfo::decode(d, ctx)?),
-                        _ => return Err(Error::message("invalid tag for crypto-coininfo")),
-                    },
-                    6 => match d.tag()? {
-                        Tag::Unassigned(304) => origin = Some(CryptoKeypath::decode(d, ctx)?),
-                        _ => return Err(Error::message("invalid tag for crypto-keypath")),
-                    },
-                    7 => match d.tag()? {
-                        Tag::Unassigned(304) => children = Some(CryptoKeypath::decode(d, ctx)?),
-                        _ => return Err(Error::message("invalid tag for crypto-keypath")),
-                    },
-                    8 => {
-                        parent_fingerprint = Some(
-                            NonZeroU32::new(d.u32()?)
-                                .ok_or_else(|| Error::message("parent-fingerprint is zero"))?,
-                        )
+        let len = d.map()?;
+        let mut i = 0;
+        loop {
+            match len {
+                Some(len) => {
+                    if i >= len {
+                        break;
                     }
-                    9 => name = Some(d.str()?),
-                    10 => note = Some(d.str()?),
-                    _ => return Err(Error::message("unknown map entry")),
+                }
+                None => {
+                    if d.datatype()? == Type::Break {
+                        break;
+                    }
                 }
             };
-        }
 
-        if let Some(len) = d.map()? {
-            for _ in 0..len {
-                decode_inner!();
+            match d.u32()? {
+                2 => is_private = d.bool()?,
+                3 => key_data = Some(DecodeBytes::decode_bytes(d, ctx)?),
+                4 => chain_code = Some(DecodeBytes::decode_bytes(d, ctx)?),
+                5 => match d.tag()? {
+                    Tag::Unassigned(305) => use_info = Some(CryptoCoinInfo::decode(d, ctx)?),
+                    _ => return Err(Error::message("invalid tag for crypto-coininfo")),
+                },
+                6 => match d.tag()? {
+                    Tag::Unassigned(304) => origin = Some(CryptoKeypath::decode(d, ctx)?),
+                    _ => return Err(Error::message("invalid tag for crypto-keypath")),
+                },
+                7 => match d.tag()? {
+                    Tag::Unassigned(304) => children = Some(CryptoKeypath::decode(d, ctx)?),
+                    _ => return Err(Error::message("invalid tag for crypto-keypath")),
+                },
+                8 => {
+                    parent_fingerprint = Some(
+                        NonZeroU32::new(d.u32()?)
+                            .ok_or_else(|| Error::message("parent-fingerprint is zero"))?,
+                    )
+                }
+                9 => name = Some(d.str()?),
+                10 => note = Some(d.str()?),
+                _ => return Err(Error::message("unknown map entry")),
             }
-        } else {
-            while d.datatype()? != Type::Break {
-                decode_inner!();
-            }
+
+            i += 1;
         }
 
         Ok(Self {

@@ -42,7 +42,7 @@ pub enum UR<'a> {
         /// The sequence number.
         sequence: u32,
         /// The total sequence count.
-        sequence_count: usize,
+        sequence_count: u32,
     },
     /// A deserialized multiple-part resource.
     MultiPartDeserialized {
@@ -149,6 +149,26 @@ impl<'a> UR<'a> {
     pub fn as_part(&self) -> Option<&Part> {
         match self {
             UR::MultiPartDeserialized { fragment, .. } => Some(fragment),
+            _ => None,
+        }
+    }
+
+    /// Returns `Some(n)` where `n` is the sequence number if the Uniform
+    /// Resource is multi part.
+    pub fn sequence(&self) -> Option<u32> {
+        match self {
+            UR::MultiPart { sequence, .. } => Some(*sequence),
+            UR::MultiPartDeserialized { fragment, .. } => Some(fragment.sequence),
+            _ => None,
+        }
+    }
+
+    /// Returns `Some(n)` where `n` is the sequence count if the Uniform
+    /// Resource is multi part.
+    pub fn sequence_count(&self) -> Option<u32> {
+        match self {
+            UR::MultiPart { sequence_count, .. } => Some(*sequence_count),
+            UR::MultiPartDeserialized { fragment, .. } => Some(fragment.sequence_count),
             _ => None,
         }
     }

@@ -218,14 +218,14 @@ pub enum ParseURError {
 impl fmt::Display for ParseURError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ParseURError::InvalidScheme => write!(f, "Invalid scheme"),
-            ParseURError::TypeUnspecified => write!(f, "No type specified"),
+            ParseURError::InvalidScheme => write!(f, "Invalid Uniform Resource scheme"),
+            ParseURError::TypeUnspecified => write!(f, "No type was specified for the Uniform Resource"),
             ParseURError::InvalidCharacters => {
-                write!(f, "Type contains invalid characters")
+                write!(f, "Uniform Resource type contains invalid characters")
             }
-            ParseURError::InvalidIndices => write!(f, "Invalid indices"),
+            ParseURError::InvalidIndices => write!(f, "Uniform Resource indices are invalid"),
             ParseURError::ParseInt(e) => {
-                write!(f, "Could not parse indices: {e}")
+                write!(f, "Could not parse Uniform Resource indices: {e}")
             }
         }
     }

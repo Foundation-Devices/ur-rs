@@ -58,7 +58,8 @@ impl<T: Types> BaseFragmentChooser<T> {
 
         let mut set = I::default();
         if sequence <= sequence_count {
-            set.insert((sequence - 1).try_into().unwrap());
+            set.insert((sequence - 1).try_into().unwrap())
+                .expect("Not enough capacity to store single index");
             return set;
         }
 

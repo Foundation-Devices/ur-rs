@@ -128,7 +128,7 @@ impl<T: Types> BaseDecoder<T> {
         while !self.is_complete() && !self.queue.is_empty() {
             let part = self.queue.pop_front().unwrap();
             if part.is_simple() {
-                self.process_simple(&part);
+                self.process_simple(&part)?;
             } else {
                 self.process_mixed(part);
             }
@@ -284,10 +284,10 @@ impl<T: Types> BaseDecoder<T> {
         });
     }
 
-    fn process_simple(&mut self, part: &IndexedPart<T::Fragment, T::Indexes>) {
+    fn process_simple(&mut self, part: &IndexedPart<T::Fragment, T::Indexes>) -> Result<(), Error> {
         let index = *part.indexes.first().unwrap();
         if self.received.contains(&index) {
-            return;
+            return Ok(());
         }
 
         self.reduce_mixed(part);
@@ -295,7 +295,11 @@ impl<T: Types> BaseDecoder<T> {
         let offset = index * self.message_description.as_ref().unwrap().fragment_length;
         self.message[offset..offset + self.message_description.as_ref().unwrap().fragment_length]
             .copy_from_slice(&part.data);
-        self.received.insert(index);
+        self.received
+            .insert(index)
+            .map_err(|_| Error::TooManyFragments)?;
+
+        Ok(())
     }
 
     fn process_mixed(&mut self, mut part: IndexedPart<T::Fragment, T::Indexes>) {
@@ -441,6 +445,8 @@ pub enum Error {
         /// Current capacity.
         capacity: usize,
     },
+    /// Too many fragments.
+    TooManyFragments,
 }
 
 impl fmt::Display for Error {
@@ -486,6 +492,7 @@ impl fmt::Display for Error {
             Error::NotEnoughSpace { needed, capacity } => {
                 write!(f, "Not enough space: needed {needed}, capacity {capacity}")?
             }
+            Error::TooManyFragments => write!(f, "Too many fragments for the current message")?,
         };
         Ok(())
     }

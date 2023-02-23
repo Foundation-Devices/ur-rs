@@ -9,7 +9,7 @@ pub trait Set<T>: Clone + Default + Extend<T> {
         Self: 'a;
 
     /// Insert a new item into set set.
-    fn insert(&mut self, value: T) -> bool;
+    fn insert(&mut self, value: T) -> Result<bool, T>;
 
     /// Remove an item from set set.
     fn remove(&mut self, value: &T) -> bool;
@@ -48,8 +48,8 @@ where
 {
     type Iter<'a> = alloc::collections::btree_set::Iter<'a, T> where T: 'a, Self: 'a;
 
-    fn insert(&mut self, value: T) -> bool {
-        alloc::collections::BTreeSet::insert(self, value)
+    fn insert(&mut self, value: T) -> Result<bool, T> {
+        Ok(alloc::collections::BTreeSet::insert(self, value))
     }
 
     fn remove(&mut self, value: &T) -> bool {
@@ -99,11 +99,8 @@ where
         T: 'a,
         Self: 'a;
 
-    fn insert(&mut self, value: T) -> bool {
-        match heapless::IndexSet::insert(self, value) {
-            Ok(v) => v,
-            Err(_) => panic!("tried to insert past allocated capacity"),
-        }
+    fn insert(&mut self, value: T) -> Result<bool, T> {
+        heapless::IndexSet::insert(self, value)
     }
 
     fn remove(&mut self, value: &T) -> bool {

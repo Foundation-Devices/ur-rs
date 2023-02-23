@@ -78,9 +78,9 @@ impl<'a, Other, C> BaseValue<'a, Other, C> {
             "cose-mac" |
             "cose-key" |
             "cose-keyset" |
-            "crypto-msg" => return Err(Error::Unimplemented(ur_type)),
+            "crypto-msg" => return Err(Error::Unsupported(ur_type)),
             "crypto-seed" => BaseValue::CryptoSeed(minicbor::decode(message)?),
-            "crypto-bip39" => return Err(Error::Unimplemented(ur_type)),
+            "crypto-bip39" => return Err(Error::Unsupported(ur_type)),
             "crypto-slip39" => return Err(Error::Deprecated(ur_type)),
             "crypto-hdkey" => BaseValue::CryptoHDKey(minicbor::decode(message)?),
             "crypto-keypath" => BaseValue::CryptoKeypath(minicbor::decode(message)?),
@@ -88,11 +88,11 @@ impl<'a, Other, C> BaseValue<'a, Other, C> {
             "crypto-eckey" => BaseValue::CryptoECKey(minicbor::decode(message)?),
             "crypto-address" => BaseValue::CryptoAddress(minicbor::decode(message)?),
             "crypto-output" |
-            "crypto-sskr" => return Err(Error::Unimplemented(ur_type)),
+            "crypto-sskr" => return Err(Error::Unsupported(ur_type)),
             "crypto-psbt" => BaseValue::CryptoPSBT(minicbor::decode(message)?),
-            "crypto-account" => return Err(Error::Unimplemented(ur_type)),
+            "crypto-account" => return Err(Error::Unsupported(ur_type)),
             "crypto-request" => BaseValue::CryptoRequest(minicbor::decode(message)?),
-            "crypto-response" => return Err(Error::Unimplemented(ur_type)),
+            "crypto-response" => return Err(Error::Unsupported(ur_type)),
             _ => return Err(Error::UnknownType(ur_type)),
         };
 
@@ -149,7 +149,7 @@ pub enum Error<'a> {
     /// Deprecated UR type.
     Deprecated(&'a str),
     /// Unimplemented UR type.
-    Unimplemented(&'a str),
+    Unsupported(&'a str),
     /// Unknown UR type.
     UnknownType(&'a str),
 }
@@ -157,15 +157,15 @@ pub enum Error<'a> {
 impl<'a> fmt::Display for Error<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            Error::Cbor(e) => write!(f, "cbor decoding error: {e}"),
+            Error::Cbor(e) => write!(f, "CBOR decoding error: {e}"),
             Error::Deprecated(ur_type) => {
-                write!(f, "deprecated UR type \"{ur_type}\"")
+                write!(f, "Deprecated UR type \"{ur_type}\"")
             }
-            Error::Unimplemented(ur_type) => {
-                write!(f, "unimplemented UR type \"{ur_type}\"")
+            Error::Unsupported(ur_type) => {
+                write!(f, "Unsupported UR type \"{ur_type}\"")
             }
             Error::UnknownType(ur_type) => {
-                write!(f, "unknown UR type \"{ur_type}\"")
+                write!(f, "Unknown UR type \"{ur_type}\"")
             }
         }
     }
